@@ -1,9 +1,12 @@
 package org.iot.dsa.dslink.test;
 
-import org.iot.dsa.dslink.DSIRequester;
-import org.iot.dsa.dslink.DSLinkConnection;
 import org.iot.dsa.dslink.DSMainNode;
-import org.iot.dsa.dslink.DSLinkConnection.Listener;
+import org.iot.dsa.dslink.test.subscribe.SimpleSubscribeTest;
+import org.iot.dsa.dslink.test.subscribe.SubscribeChild;
+import org.iot.dsa.node.DSInfo;
+import org.iot.dsa.node.action.ActionInvocation;
+import org.iot.dsa.node.action.ActionResult;
+import org.iot.dsa.node.action.DSAction;
 import org.iot.dsa.util.DSException;
 /**
  * The root and only node of this link.
@@ -11,10 +14,12 @@ import org.iot.dsa.util.DSException;
  * @author Aaron Hansen
  */
 public class MainNode extends DSMainNode {
+    
+    private static final String SUBCHILD = "Subscribe";
+    private static final String RUN_TESTS = "Run_All_Tests";
 
 
-    private static DSIRequester requester;
-    private static final Object requesterLock = new Object();
+    public DSInfo subscribeChild = getInfo(SUBCHILD);
 
     public MainNode() {
     }
@@ -27,40 +32,29 @@ public class MainNode extends DSMainNode {
     @Override
     protected void declareDefaults() {
         super.declareDefaults();
+        declareDefault(RUN_TESTS, makeRunAllTestsAction());
+        declareDefault(SUBCHILD, new SubscribeChild());
     }
-
     
-    @Override
-    protected void onStarted() {
-        getLink().getConnection().addListener(new Listener() {
+    private DSAction makeRunAllTestsAction() {
+        DSAction act = new DSAction() {
             @Override
-            public void onConnect(DSLinkConnection connection) {
-                MainNode.setRequester(getLink().getConnection().getRequester());
+            public ActionResult invoke(DSInfo info, ActionInvocation invocation) {
+                ((MainNode) info.getParent()).runAllTests();
+                return null;
             }
-
-            @Override
-            public void onDisconnect(DSLinkConnection connection) {
-            }
-        });
+        };
+        return act;
     }
-
-    public static DSIRequester getRequester() {
-        synchronized (requesterLock) {
-            while (requester == null) {
-                try {
-                    requesterLock.wait();
-                } catch (InterruptedException e) {
-                    DSException.throwRuntime(e);
-                }
-            }
-            return requester;
+    
+    private void runAllTests() {
+        try {
+            new SimpleSubscribeTest(this).runSimpleTest();
+            info("Simple Subscribe Test Success");
+        } catch (Exception e) {
+            info(e);
+            DSException.throwRuntime(e);
         }
-    }
+    }   
 
-    public static void setRequester(DSIRequester requester) {
-        synchronized (requesterLock) {
-            MainNode.requester = requester;
-            requesterLock.notifyAll();
-        }
-    }
 }
