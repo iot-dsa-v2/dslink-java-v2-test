@@ -17,7 +17,8 @@ public class SimpleSubscribeTest {
     }
     
     public void runSimpleTest() throws InterruptedException {
-        testSubscribe("downstream" + mainNode.subscribeChild.getNode().getPath() + "/" + SubscribeChild.COUNTER, 0, null);
+        String path = "/downstream" + mainNode.subscribeChild.getNode().getPath() + "/" + SubscribeChild.COUNTER;
+        testSubscribe(path, 0, null);
     }
     
     public void testSubscribe(String path, int qos, DSElement expectedUpdate) throws InterruptedException {
