@@ -1,60 +1,60 @@
 package org.iot.dsa.dslink.test;
 
 import org.iot.dsa.dslink.DSMainNode;
-import org.iot.dsa.dslink.test.subscribe.SimpleSubscribeTest;
-import org.iot.dsa.dslink.test.subscribe.SubscribeChild;
+import org.iot.dsa.dslink.test.subscribe.Subscriptions;
 import org.iot.dsa.node.DSInfo;
 import org.iot.dsa.node.action.ActionInvocation;
 import org.iot.dsa.node.action.ActionResult;
 import org.iot.dsa.node.action.DSAction;
-import org.iot.dsa.util.DSException;
+
 /**
- * The root and only node of this link.
+ * Root hub of all tests and provides an action to run them all.
  *
  * @author Aaron Hansen
  */
 public class MainNode extends DSMainNode {
-    
-    private static final String SUBCHILD = "Subscribe";
-    private static final String RUN_TESTS = "Run_All_Tests";
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Class Fields
+    ///////////////////////////////////////////////////////////////////////////
 
-    public DSInfo subscribeChild = getInfo(SUBCHILD);
+    public static final String SUBSCRIPTIONS = "Subscriptions";
+    public static final String RUNALL = "Run-All-Tests";
 
-    public MainNode() {
+    ///////////////////////////////////////////////////////////////////////////
+    // Instance Fields
+    ///////////////////////////////////////////////////////////////////////////
+
+    private DSInfo runAll = getInfo(RUNALL);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Public Methods
+    ///////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public ActionResult onInvoke(DSInfo action, ActionInvocation request) {
+        if (action == runAll) {
+            runAll();
+            return null;
+        }
+        return super.onInvoke(action, request);
     }
 
-    
-    /**
-     * Defines the permanent children of this node type, their existence is guaranteed in all
-     * instances.  This is only ever called once per, type per process.
-     */
+    public void runAll() {
+        Subscriptions s = (Subscriptions) get(SUBSCRIPTIONS);
+        s.runAll();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Protected Methods
+    ///////////////////////////////////////////////////////////////////////////
+
     @Override
     protected void declareDefaults() {
         super.declareDefaults();
-        declareDefault(RUN_TESTS, makeRunAllTestsAction());
-        declareDefault(SUBCHILD, new SubscribeChild());
+        declareDefault(RUNALL, DSAction.DEFAULT);
+        declareDefault(SUBSCRIPTIONS, new Subscriptions());
     }
-    
-    private DSAction makeRunAllTestsAction() {
-        DSAction act = new DSAction() {
-            @Override
-            public ActionResult invoke(DSInfo info, ActionInvocation invocation) {
-                ((MainNode) info.getParent()).runAllTests();
-                return null;
-            }
-        };
-        return act;
-    }
-    
-    private void runAllTests() {
-        try {
-            new SimpleSubscribeTest(this).runSimpleTest();
-            info("Simple Subscribe Test Success");
-        } catch (Exception e) {
-            info(e);
-            DSException.throwRuntime(e);
-        }
-    }   
 
 }
+
