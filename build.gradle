@@ -23,8 +23,8 @@ repositories {
 }
 
 dependencies {
-    compile 'org.iot-dsa:dslink-core:+'
-    compile 'org.iot-dsa:dslink-websocket-standalone:+'
+    compile 'org.iot-dsa:dslink-v2:+'
+    compile 'org.iot-dsa:dslink-v2-websocket:+'
     testCompile 'org.testng:testng:+'
 }
 
