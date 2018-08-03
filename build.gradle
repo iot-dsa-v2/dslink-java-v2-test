@@ -18,14 +18,14 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url 'https://iot-dsa-v2.github.io/sdk-dslink-java-v2/repository/'
+        url 'https://jitpack.io'
     }
 }
 
 dependencies {
-    compile 'org.iot-dsa:dslink-v2:+'
-    compile 'org.iot-dsa:dslink-v2-websocket:+'
-    testCompile 'org.testng:testng:+'
+    implementation 'org.iot-dsa:dslink-v2-websocket:+'
+    //implementation 'com.github.iot-dsa-v2:sdk-dslink-java-v2:+'
+    testImplementation 'org.testng:testng:+'
 }
 
 applicationDistribution.from(new File(project.projectDir, "/dslink.json"))
@@ -35,3 +35,6 @@ run {
     workingDir project.buildDir
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.9'
+}

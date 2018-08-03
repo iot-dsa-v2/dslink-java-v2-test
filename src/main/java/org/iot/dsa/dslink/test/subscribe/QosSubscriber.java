@@ -13,12 +13,10 @@ import org.iot.dsa.time.DSDateTime;
 
 /**
  * A one time use subscriber.
+ *
+ * @author Aaron Hansen
  */
-public class Qos1Subscriber extends DSNode implements OutboundSubscribeHandler {
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Class Fields
-    ///////////////////////////////////////////////////////////////////////////
+public class QosSubscriber extends DSNode implements OutboundSubscribeHandler {
 
     ///////////////////////////////////////////////////////////////////////////
     // Protected Methods
@@ -28,9 +26,9 @@ public class Qos1Subscriber extends DSNode implements OutboundSubscribeHandler {
 
     private static final String COMPLETE = "Complete";
     private static final String DURATION = "Duration";
-    private static final String OUT_OF_ORDER = "Out_Of_Order";
+    private static final String OUT_OF_ORDER = "Out Of Order";
     private static final String SKIPPED = "Skipped";
-    private static final String TOTAL_LOST = "Total_Lost";
+    private static final String TOTAL_LOST = "Total Lost";
 
     ///////////////////////////////////////////////////////////////////////////
     // Instance Fields
@@ -41,6 +39,7 @@ public class Qos1Subscriber extends DSNode implements OutboundSubscribeHandler {
     private boolean open;
     private int outOfOrder;
     private String path;
+    private int qos = 1;
     private int skipped;
     private long started;
     private OutboundStream stream;
@@ -50,12 +49,18 @@ public class Qos1Subscriber extends DSNode implements OutboundSubscribeHandler {
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
 
-    public Qos1Subscriber() {
+    public QosSubscriber() {
     }
 
-    public Qos1Subscriber(String path, int values) {
+    public QosSubscriber(String path, int values) {
         this.path = path;
         this.values = values;
+    }
+
+    public QosSubscriber(String path, int values, int qos) {
+        this.path = path;
+        this.values = values;
+        this.qos = qos;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -64,15 +69,18 @@ public class Qos1Subscriber extends DSNode implements OutboundSubscribeHandler {
 
     @Override
     public void onClose() {
+        trace("QosSubscriber.onClose");
         open = false;
     }
 
     @Override
     public void onError(ErrorType err, String msg) {
+        trace("QosSubscriber.onError");
     }
 
     @Override
     public void onInit(String path, int qos, OutboundStream stream) {
+        trace("QosSubscriber.onInit");
         open = true;
         this.stream = stream;
     }
@@ -80,15 +88,22 @@ public class Qos1Subscriber extends DSNode implements OutboundSubscribeHandler {
     @Override
     public synchronized void onUpdate(DSDateTime timestamp, DSElement value, DSStatus status) {
         int val = value.toInt();
+        trace(trace() ? (getPath() + " " + val) : null);
         lastTs = System.currentTimeMillis();
-        if (val >= 0) {
+        if (val < 0) {
+            lastValue = -1;
+            skipped = 0;
+            outOfOrder = 0;
+        } else {
             if (val > lastValue) {
                 if (val != (lastValue + 1)) {
                     skipped += val - (lastValue + 1);
+                    debug(debug() ? getPath() + " skip: " + val : null);
                 }
                 lastValue = val;
             } else {
                 outOfOrder++;
+                debug(debug() ? getPath() + " outOfOrder: " + val : null);
             }
         }
         notify();
@@ -98,7 +113,9 @@ public class Qos1Subscriber extends DSNode implements OutboundSubscribeHandler {
     // Protected Methods
     ///////////////////////////////////////////////////////////////////////////
 
+    @Override
     protected void declareDefaults() {
+        super.declareDefaults();
         declareDefault(COMPLETE, DSBool.FALSE).setReadOnly(true);
         declareDefault(OUT_OF_ORDER, DSInt.valueOf(0)).setReadOnly(true);
         declareDefault(SKIPPED, DSInt.valueOf(0)).setReadOnly(true);
@@ -106,13 +123,27 @@ public class Qos1Subscriber extends DSNode implements OutboundSubscribeHandler {
         declareDefault(DURATION, DSInt.valueOf(0)).setReadOnly(true);
     }
 
+    @Override
+    protected void onStopped() {
+        close();
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Package / Private Methods
     ///////////////////////////////////////////////////////////////////////////
 
+    void close() {
+        trace("QosSubscriber.close");
+        if (stream != null) {
+            stream.closeStream();
+        }
+        stream = null;
+    }
+
     void start(DSLinkConnection conn) {
+        trace("QosSubscriber.start");
         started = System.currentTimeMillis();
-        conn.getRequester().subscribe(path, 1, this);
+        conn.getRequester().subscribe(path, qos, this);
     }
 
     synchronized void waitForInitialUpdate() {
@@ -150,12 +181,18 @@ public class Qos1Subscriber extends DSNode implements OutboundSubscribeHandler {
         put(TOTAL_LOST, DSInt.valueOf(skipped - outOfOrder));
         stream.closeStream();
         if (outOfOrder > 0) {
+            error("Fail (out of order values) " + getPath());
             return false;
         }
         if (skipped > 0) {
+            error("Fail (skipped values) " + getPath());
             return false;
         }
-        return lastValue == target;
+        if (lastValue != target) {
+            error("Fail target not met (" + lastValue + " != " + target + ") " + getPath());
+            return false;
+        }
+        return true;
     }
 
     ///////////////////////////////////////////////////////////////////////////
