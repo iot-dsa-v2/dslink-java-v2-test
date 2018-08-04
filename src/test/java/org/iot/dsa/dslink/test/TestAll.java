@@ -34,7 +34,7 @@ public class TestAll implements DSLinkConnection.Listener {
         //Logger.getLogger("").setLevel(Level.ALL);
         Assert.assertTrue(link.getConnection().isConnected());
         Assert.assertTrue(root.test());
-        link.stop();
+        link.shutdown();
     }
 
     ///////////////////////////////////////////////////////////////////////////
