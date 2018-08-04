@@ -22,9 +22,9 @@
 **/.DS_Store
 
 # Runtime files
-**/.key
+**.jks
+**.key
 **/db
-**/nodes.json
-**/nodes*.zip
-**/*.log.*.zip
+**nodes.json
+**nodes*.zip
 /bin/
