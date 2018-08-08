@@ -14,7 +14,7 @@ public class Qos1Test extends QosTest {
         super.declareDefaults();
         //change default values
         put(NUM_VALUES, DSInt.valueOf(5));
-        put(CHANGES, DSInt.valueOf(2000));
+        put(CHANGES, DSInt.valueOf(1000));
         put(INTERVAL, DSInt.valueOf(10));
     }
 
