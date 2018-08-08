@@ -10,14 +10,6 @@ import org.iot.dsa.node.DSNode;
 public class Qos2Test extends QosTest {
 
     @Override
-    protected boolean doTest() {
-        int v = numValues.getElement().toInt();
-        int c = changes.getElement().toInt();
-        int i = interval.getElement().toInt();
-        return doTest(v, c, i);
-    }
-
-    @Override
     protected void performUpdates(DSNode values, int changes, int interval) {
         DSInt v;
         int reconnect = (changes / 3);
@@ -27,6 +19,12 @@ public class Qos2Test extends QosTest {
                 values.put(info, v);
             }
             if (i == reconnect) {
+                try {
+                    //Lenient, let things settle before disconnecting.
+                    Thread.sleep(1000);
+                } catch (Exception x) {
+                    warn(getPath(), x);
+                }
                 getConnection().disconnect();
             }
             if (interval > 0) {

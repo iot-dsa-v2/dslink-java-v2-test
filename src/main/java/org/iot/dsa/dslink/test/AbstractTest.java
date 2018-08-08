@@ -18,6 +18,7 @@ public abstract class AbstractTest extends DSNode implements Test {
     // Class Fields
     ///////////////////////////////////////////////////////////////////////////
 
+    static final String ENABLED = "Enabled";
     static final String LAST_DURATION = "Last Duration";
     static final String LAST_RESULT = "Last Result";
     static final String LAST_START = "Last Start";
@@ -29,6 +30,7 @@ public abstract class AbstractTest extends DSNode implements Test {
     ///////////////////////////////////////////////////////////////////////////
 
     private DSInfo duration = getInfo(LAST_DURATION);
+    private DSInfo enabled = getInfo(ENABLED);
     private DSInfo lastResult = getInfo(LAST_RESULT);
     private DSInfo lastStart = getInfo(LAST_START);
     private DSInfo runAction = getInfo(RUN);
@@ -41,6 +43,11 @@ public abstract class AbstractTest extends DSNode implements Test {
     ///////////////////////////////////////////////////////////////////////////
     // Public Methods
     ///////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public boolean isEnabled() {
+        return enabled.getElement().toBoolean();
+    }
 
     @Override
     public ActionResult onInvoke(DSInfo action, ActionInvocation request) {
@@ -93,6 +100,7 @@ public abstract class AbstractTest extends DSNode implements Test {
     protected void declareDefaults() {
         super.declareDefaults();
         declareDefault(RUN, getRunAction());
+        declareDefault(ENABLED, DSBool.TRUE);
         declareDefault(LAST_START, DSString.EMPTY).setReadOnly(true).setTransient(true);
         declareDefault(LAST_DURATION, DSString.EMPTY).setReadOnly(true).setTransient(true);
         declareDefault(LAST_RESULT, DSString.EMPTY).setReadOnly(true).setTransient(true);

@@ -91,7 +91,7 @@ public class QosSubscriber extends DSNode implements OutboundSubscribeHandler {
         trace(trace() ? (getPath() + " " + val) : null);
         lastTs = System.currentTimeMillis();
         if (val < 0) {
-            lastValue = -1;
+            lastValue = val;
             skipped = 0;
             outOfOrder = 0;
         } else {
@@ -149,7 +149,7 @@ public class QosSubscriber extends DSNode implements OutboundSubscribeHandler {
     synchronized void waitForInitialUpdate() {
         if (lastTs == 0) {
             try {
-                wait(10000);
+                wait(TIMEOUT);
             } catch (Exception x) {
                 error(getPath(), x);
             }

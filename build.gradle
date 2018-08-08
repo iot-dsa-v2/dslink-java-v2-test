@@ -23,8 +23,8 @@ repositories {
 }
 
 dependencies {
-    //implementation 'org.iot-dsa:dslink-v2-websocket:+'
-    implementation 'com.github.iot-dsa-v2:sdk-dslink-java-v2:+'
+    implementation 'org.iot-dsa:dslink-v2-websocket:+'
+    //implementation 'com.github.iot-dsa-v2:sdk-dslink-java-v2:+'
     testImplementation 'org.testng:testng:+'
 }
 
