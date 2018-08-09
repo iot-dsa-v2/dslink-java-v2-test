@@ -88,22 +88,22 @@ public class QosSubscriber extends DSNode implements OutboundSubscribeHandler {
     @Override
     public synchronized void onUpdate(DSDateTime timestamp, DSElement value, DSStatus status) {
         int val = value.toInt();
-        trace(trace() ? (getPath() + " " + val) : null);
+        trace(trace() ? (getPath() + " onUpdate: " + val) : null);
         lastTs = System.currentTimeMillis();
         if (val < 0) {
-            lastValue = -1;
+            lastValue = val;
             skipped = 0;
             outOfOrder = 0;
         } else {
             if (val > lastValue) {
                 if (val != (lastValue + 1)) {
                     skipped += val - (lastValue + 1);
-                    debug(debug() ? getPath() + " skip: " + val : null);
+                    trace(trace() ? getPath() + " skip: " + val : null);
                 }
                 lastValue = val;
             } else {
                 outOfOrder++;
-                debug(debug() ? getPath() + " outOfOrder: " + val : null);
+                trace(trace() ? getPath() + " outOfOrder: " + val : null);
             }
         }
         notify();
@@ -133,7 +133,7 @@ public class QosSubscriber extends DSNode implements OutboundSubscribeHandler {
     ///////////////////////////////////////////////////////////////////////////
 
     void close() {
-        trace("QosSubscriber.close");
+        trace(trace() ? "QosSubscriber.close()" + getPath() : null);
         if (stream != null) {
             stream.closeStream();
         }
@@ -141,7 +141,7 @@ public class QosSubscriber extends DSNode implements OutboundSubscribeHandler {
     }
 
     void start(DSLinkConnection conn) {
-        trace("QosSubscriber.start");
+        trace(trace() ? "QosSubscriber.start()" + getPath() : null);
         started = System.currentTimeMillis();
         conn.getRequester().subscribe(path, qos, this);
     }
@@ -149,7 +149,7 @@ public class QosSubscriber extends DSNode implements OutboundSubscribeHandler {
     synchronized void waitForInitialUpdate() {
         if (lastTs == 0) {
             try {
-                wait(10000);
+                wait(TIMEOUT);
             } catch (Exception x) {
                 error(getPath(), x);
             }
@@ -180,19 +180,27 @@ public class QosSubscriber extends DSNode implements OutboundSubscribeHandler {
         put(SKIPPED, DSInt.valueOf(skipped));
         put(TOTAL_LOST, DSInt.valueOf(skipped - outOfOrder));
         stream.closeStream();
+        boolean pass = true;
         if (outOfOrder > 0) {
-            error("Fail (out of order values) " + getPath());
-            return false;
+            error(outOfOrder + " out of order values " + getPath());
+            pass = false;
         }
         if (skipped > 0) {
-            error("Fail (skipped values) " + getPath());
-            return false;
+            error(skipped + " skipped values " + getPath());
+            pass = false;
         }
         if (lastValue != target) {
-            error("Fail target not met (" + lastValue + " != " + target + ") " + getPath());
-            return false;
+            error("Target not met (" + lastValue + " != " + target + ") " + getPath());
+            pass = false;
         }
-        return true;
+        if (!pass)
+        {
+            int tmp = skipped - outOfOrder;
+            if (tmp > 0) {
+                error(tmp + " lost values " + getPath());
+            }
+        }
+        return pass;
     }
 
     ///////////////////////////////////////////////////////////////////////////

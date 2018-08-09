@@ -12,12 +12,18 @@ import org.iot.dsa.node.action.DSAbstractAction;
 import org.iot.dsa.node.action.DSAction;
 import org.iot.dsa.time.DSDateTime;
 
+/**
+ * All leaf tests should subclass this.  All they need to do is implement doTest().
+ *
+ * @author Aaron Hansen
+ */
 public abstract class AbstractTest extends DSNode implements Test {
 
     ///////////////////////////////////////////////////////////////////////////
     // Class Fields
     ///////////////////////////////////////////////////////////////////////////
 
+    static final String ENABLED = "Enabled";
     static final String LAST_DURATION = "Last Duration";
     static final String LAST_RESULT = "Last Result";
     static final String LAST_START = "Last Start";
@@ -29,18 +35,20 @@ public abstract class AbstractTest extends DSNode implements Test {
     ///////////////////////////////////////////////////////////////////////////
 
     private DSInfo duration = getInfo(LAST_DURATION);
+    private DSInfo enabled = getInfo(ENABLED);
     private DSInfo lastResult = getInfo(LAST_RESULT);
     private DSInfo lastStart = getInfo(LAST_START);
     private DSInfo runAction = getInfo(RUN);
     private DSInfo running = getInfo(RUNNING);
 
     ///////////////////////////////////////////////////////////////////////////
-    // Constructors
-    ///////////////////////////////////////////////////////////////////////////
-
-    ///////////////////////////////////////////////////////////////////////////
     // Public Methods
     ///////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public boolean isEnabled() {
+        return enabled.getElement().toBoolean();
+    }
 
     @Override
     public ActionResult onInvoke(DSInfo action, ActionInvocation request) {
@@ -64,7 +72,6 @@ public abstract class AbstractTest extends DSNode implements Test {
             info("Test " + getPath());
             DSDateTime time = DSDateTime.currentTime();
             put(lastStart, time);
-            debug(getPath() + " start " + time);
             boolean res = false;
             try {
                 res = doTest();
@@ -78,7 +85,7 @@ public abstract class AbstractTest extends DSNode implements Test {
             debug(getPath() + " completed in " + str);
             str = res ? "Pass" : "Fail";
             put(lastResult, DSString.valueOf(str));
-            info(getPath() + " " + str);
+            info(str + " " + getPath());
             return res;
         } finally {
             put(running, DSBool.FALSE);
@@ -93,6 +100,7 @@ public abstract class AbstractTest extends DSNode implements Test {
     protected void declareDefaults() {
         super.declareDefaults();
         declareDefault(RUN, getRunAction());
+        declareDefault(ENABLED, DSBool.TRUE);
         declareDefault(LAST_START, DSString.EMPTY).setReadOnly(true).setTransient(true);
         declareDefault(LAST_DURATION, DSString.EMPTY).setReadOnly(true).setTransient(true);
         declareDefault(LAST_RESULT, DSString.EMPTY).setReadOnly(true).setTransient(true);

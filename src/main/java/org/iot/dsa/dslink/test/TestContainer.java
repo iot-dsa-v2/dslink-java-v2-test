@@ -41,21 +41,23 @@ public class TestContainer extends AbstractTest implements Test {
         boolean res;
         while (info != null) {
             test = (Test) info.getObject();
-            try {
-                res = test.test();
-            } catch (Exception x) {
-                error(getPath(), x);
-                res = false;
-            }
-            if (test instanceof TestContainer) {
-                TestContainer container = (TestContainer) test;
-                pass += container.getPass();
-                fail += container.getFail();
-            } else {
-                if (res) {
-                    pass++;
+            if (test.isEnabled()) {
+                try {
+                    res = test.test();
+                } catch (Exception x) {
+                    error(getPath(), x);
+                    res = false;
+                }
+                if (test instanceof TestContainer) {
+                    TestContainer container = (TestContainer) test;
+                    pass += container.getPass();
+                    fail += container.getFail();
                 } else {
-                    fail++;
+                    if (res) {
+                        pass++;
+                    } else {
+                        fail++;
+                    }
                 }
             }
             info = info.next(Test.class);

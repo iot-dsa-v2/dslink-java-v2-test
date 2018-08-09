@@ -1,5 +1,6 @@
 package org.iot.dsa.dslink.test;
 
+import org.iot.dsa.DSRuntime;
 import org.iot.dsa.dslink.DSMainNode;
 import org.iot.dsa.dslink.test.subscribe.Subscriptions;
 import org.iot.dsa.node.DSBool;
@@ -22,6 +23,7 @@ public class MainNode extends DSMainNode implements Test {
     // Class Fields
     ///////////////////////////////////////////////////////////////////////////
 
+    static final String AUTORUN = "Auto Run";
     static final String RUN = "Run";
     static final String FAIL = "Fail";
     static final String PASS = "Pass";
@@ -34,6 +36,7 @@ public class MainNode extends DSMainNode implements Test {
     // Instance Fields
     ///////////////////////////////////////////////////////////////////////////
 
+    private DSInfo autoRun = getInfo(AUTORUN);
     private DSInfo duration = getInfo(LAST_DURATION);
     private DSInfo fail = getInfo(FAIL);
     private DSInfo lastResult = getInfo(LAST_RESULT);
@@ -45,6 +48,11 @@ public class MainNode extends DSMainNode implements Test {
     ///////////////////////////////////////////////////////////////////////////
     // Public Methods
     ///////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 
     @Override
     public ActionResult onInvoke(DSInfo action, ActionInvocation request) {
@@ -94,6 +102,7 @@ public class MainNode extends DSMainNode implements Test {
     protected void declareDefaults() {
         super.declareDefaults();
         declareDefault(RUN, DSAction.DEFAULT);
+        declareDefault(AUTORUN, DSBool.FALSE);
         declareDefault(FAIL, DSInt.valueOf(0)).setReadOnly(true).setTransient(true);
         declareDefault(PASS, DSInt.valueOf(0)).setReadOnly(true).setTransient(true);
         declareDefault(LAST_START, DSString.EMPTY).setReadOnly(true).setTransient(true);
@@ -138,6 +147,17 @@ public class MainNode extends DSMainNode implements Test {
             return false;
         }
         return true;
+    }
+
+    @Override
+    protected void onStable() {
+        if (autoRun.getElement().toBoolean()) {
+            DSRuntime.runDelayed(new Runnable() {
+                public void run() {
+                    test();
+                }
+            }, 2500);
+        }
     }
 
 }
