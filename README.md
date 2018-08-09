@@ -50,8 +50,9 @@ The nodes of this link are organized as follows:
 
 ### MainNode
 
-This is the root node of the link.  It has a counter that is updated on a short interval,
-only when the node is subscribed.  It also has a simple action to reset the counter.
+This is the root node of the link.  Invoke run to execute the entire test
+tree.  Set the Auto Run value to true to have the tests run automatically
+after startup.
 
 _Actions_
 - Run - Runs all enabled tests in the subtree.
@@ -68,9 +69,7 @@ sections after the link starts (default is false).
 
 ### TestContainer
 
-Beside the main node and the leaf tests, everything else is a container.
-This is the root node of the link.  It has a counter that is updated on a short interval,
-only when the node is subscribed.  It also has a simple action to reset the counter.
+Every node between the main node and the leaf tests is this type.
 
 _Actions_
 - Run - Runs all enabled tests in the subtree.
