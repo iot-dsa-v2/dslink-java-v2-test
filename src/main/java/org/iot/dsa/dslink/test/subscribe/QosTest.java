@@ -38,7 +38,7 @@ public abstract class QosTest extends AbstractTest implements DSLinkConnection.L
 
     @Override
     public void onConnect(final DSLinkConnection dsLinkConnection) {
-        debug("QosTest.onConnect");
+        debug("onConnect " + getPath());
         if (subscribers != null) { //only on reconnect
             DSRuntime.runDelayed(new Runnable() {
                 @Override
@@ -81,6 +81,9 @@ public abstract class QosTest extends AbstractTest implements DSLinkConnection.L
         boolean result = true;
         DSNode tmp = new DSNode();
         try {
+            debug(debug() ? String.format(
+                    "Values=%s, Changes=%s, Interval=%s, %s",values,changes,interval,getPath())
+                          : null);
             put(NUM_VALUES, DSInt.valueOf(values));
             DSLinkConnection conn = getConnection();
             conn.addListener(this);

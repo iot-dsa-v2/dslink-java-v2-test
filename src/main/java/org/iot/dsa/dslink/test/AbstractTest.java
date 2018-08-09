@@ -12,6 +12,11 @@ import org.iot.dsa.node.action.DSAbstractAction;
 import org.iot.dsa.node.action.DSAction;
 import org.iot.dsa.time.DSDateTime;
 
+/**
+ * All leaf tests should subclass this.  All they need to do is implement doTest().
+ *
+ * @author Aaron Hansen
+ */
 public abstract class AbstractTest extends DSNode implements Test {
 
     ///////////////////////////////////////////////////////////////////////////
@@ -35,10 +40,6 @@ public abstract class AbstractTest extends DSNode implements Test {
     private DSInfo lastStart = getInfo(LAST_START);
     private DSInfo runAction = getInfo(RUN);
     private DSInfo running = getInfo(RUNNING);
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Constructors
-    ///////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////
     // Public Methods
@@ -71,7 +72,6 @@ public abstract class AbstractTest extends DSNode implements Test {
             info("Test " + getPath());
             DSDateTime time = DSDateTime.currentTime();
             put(lastStart, time);
-            debug(getPath() + " start " + time);
             boolean res = false;
             try {
                 res = doTest();
@@ -85,7 +85,7 @@ public abstract class AbstractTest extends DSNode implements Test {
             debug(getPath() + " completed in " + str);
             str = res ? "Pass" : "Fail";
             put(lastResult, DSString.valueOf(str));
-            info(getPath() + " " + str);
+            info(str + " " + getPath());
             return res;
         } finally {
             put(running, DSBool.FALSE);

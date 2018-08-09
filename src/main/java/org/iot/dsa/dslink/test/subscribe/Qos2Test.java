@@ -25,6 +25,7 @@ public class Qos2Test extends QosTest {
                 } catch (Exception x) {
                     warn(getPath(), x);
                 }
+                debug(debug() ? "Force disconnect " + getPath() : null);
                 getConnection().disconnect();
             }
             if (interval > 0) {
