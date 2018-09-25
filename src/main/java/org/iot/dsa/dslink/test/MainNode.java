@@ -110,6 +110,9 @@ public class MainNode extends DSMainNode implements Test {
         declareDefault(LAST_RESULT, DSString.EMPTY).setReadOnly(true).setTransient(true);
         declareDefault(RUNNING, DSBool.FALSE).setReadOnly(true).setTransient(true);
         declareDefault("Subscriptions", new Subscriptions());
+        declareDefault("Help", DSString.valueOf(
+                "https://github.com/iot-dsa-v2/dslink-java-v2-test#dslink-java-v2-test"))
+                .setReadOnly(true).setTransient(true);
     }
 
     protected boolean doTest() {

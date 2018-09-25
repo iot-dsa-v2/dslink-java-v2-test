@@ -12,7 +12,7 @@ import org.iot.dsa.node.DSStatus;
 import org.iot.dsa.time.DSDateTime;
 
 /**
- * A one time use subscriber.
+ * A one-time-use subscriber.
  *
  * @author Aaron Hansen
  */

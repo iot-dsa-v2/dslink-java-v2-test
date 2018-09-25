@@ -5,6 +5,11 @@ import org.iot.dsa.node.DSInt;
 import org.iot.dsa.node.DSNode;
 
 /**
+ * This tests Quality of Service 1. It verifies that all value changes are received in order.
+ *
+ * The number of values is configurable.  For every value, there is a unique subscriber.  The
+ * changes per value and the change interval are also configurable.
+ *
  * @author Aaron Hansen
  */
 public class Qos1Test extends QosTest {
@@ -12,7 +17,6 @@ public class Qos1Test extends QosTest {
     @Override
     protected void declareDefaults() {
         super.declareDefaults();
-        //change default values
         put(NUM_VALUES, DSInt.valueOf(5));
         put(CHANGES, DSInt.valueOf(1000));
         put(INTERVAL, DSInt.valueOf(10));

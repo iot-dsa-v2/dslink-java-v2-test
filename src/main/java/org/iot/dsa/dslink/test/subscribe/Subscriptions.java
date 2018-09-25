@@ -2,6 +2,9 @@ package org.iot.dsa.dslink.test.subscribe;
 
 import org.iot.dsa.dslink.test.TestContainer;
 
+/**
+ * The container for subscriptions related tests.
+ */
 public class Subscriptions extends TestContainer {
 
     @Override

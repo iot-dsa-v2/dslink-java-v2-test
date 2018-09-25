@@ -13,7 +13,8 @@ import org.iot.dsa.node.action.DSAction;
 import org.iot.dsa.time.DSDateTime;
 
 /**
- * All leaf tests should subclass this.  All they need to do is implement doTest().
+ * All leaf tests should subclass this.  This track meta-data common to all tests.
+ * Subclasses only need to implement doTest().
  *
  * @author Aaron Hansen
  */

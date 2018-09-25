@@ -1,16 +1,23 @@
 package org.iot.dsa.dslink.test.subscribe;
 
 import org.iot.dsa.DSRuntime;
+import org.iot.dsa.conn.DSConnection.DSConnectionEvent;
 import org.iot.dsa.dslink.DSLinkConnection;
 import org.iot.dsa.dslink.test.AbstractTest;
 import org.iot.dsa.node.DSInfo;
 import org.iot.dsa.node.DSInt;
 import org.iot.dsa.node.DSNode;
+import org.iot.dsa.node.event.DSIEvent;
+import org.iot.dsa.node.event.DSISubscriber;
+import org.iot.dsa.node.event.DSTopic;
 
 /**
+ * All quality of service tests have the same basic structure:  they have a configurable number
+ * of values, a configurable number of changes per value, and a subscriber to each value.
+ *
  * @author Aaron Hansen
  */
-public abstract class QosTest extends AbstractTest implements DSLinkConnection.Listener {
+public abstract class QosTest extends AbstractTest {
 
     ///////////////////////////////////////////////////////////////////////////
     // Class Fields
@@ -35,26 +42,6 @@ public abstract class QosTest extends AbstractTest implements DSLinkConnection.L
     ///////////////////////////////////////////////////////////////////////////
     // Public Methods
     ///////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void onConnect(final DSLinkConnection dsLinkConnection) {
-        debug("onConnect " + getPath());
-        if (subscribers != null) { //only on reconnect
-            DSRuntime.runDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    for (QosSubscriber sub : subscribers) {
-                        sub.start(dsLinkConnection);
-                    }
-                }
-            }, 1000);
-        }
-    }
-
-    @Override
-    public void onDisconnect(DSLinkConnection dsLinkConnection) {
-        debug("QosTest.onDisconnect");
-    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Protected Methods
@@ -82,11 +69,34 @@ public abstract class QosTest extends AbstractTest implements DSLinkConnection.L
         DSNode tmp = new DSNode();
         try {
             debug(debug() ? String.format(
-                    "Values=%s, Changes=%s, Interval=%s, %s",values,changes,interval,getPath())
+                    "Values=%s, Changes=%s, Interval=%s, %s", values, changes, interval, getPath())
                           : null);
             put(NUM_VALUES, DSInt.valueOf(values));
             DSLinkConnection conn = getConnection();
-            conn.addListener(this);
+            conn.subscribe(DSLinkConnection.CONN_TOPIC, null, new DSISubscriber() {
+                @Override
+                public void onEvent(final DSNode node, DSInfo child, DSIEvent event) {
+                    if (event == DSConnectionEvent.CONNECTED) {
+                        debug("onConnect " + getPath());
+                        if (subscribers != null) { //only on reconnect
+                            DSRuntime.runDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    for (QosSubscriber sub : subscribers) {
+                                        sub.start((DSLinkConnection) node);
+                                    }
+                                }
+                            }, 1000);
+                        }
+                    } else if (event == DSConnectionEvent.DISCONNECTED) {
+                        debug("QosTest.onDisconnect");
+                    }
+                }
+
+                @Override
+                public void onUnsubscribed(DSTopic topic, DSNode node, DSInfo child) {
+                }
+            });
             //remove children from last test
             clear();
             //create the node that will have all the values
@@ -159,6 +169,9 @@ public abstract class QosTest extends AbstractTest implements DSLinkConnection.L
         return result;
     }
 
+    /**
+     * QOS 2 performs a disconnect during testing while QOS 1 does not.
+     */
     protected abstract void performUpdates(DSNode values, int changes, int interval);
 
 }
