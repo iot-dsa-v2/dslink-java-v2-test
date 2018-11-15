@@ -50,17 +50,17 @@ public class MainNode extends DSMainNode implements Test {
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
-    public ActionResult onInvoke(DSInfo action, ActionInvocation request) {
+    public ActionResult invoke(DSInfo action, DSInfo target, ActionInvocation request) {
         if (action == runAction) {
             test();
             return null;
         }
-        return super.onInvoke(action, request);
+        return super.invoke(action, target, request);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     @Override

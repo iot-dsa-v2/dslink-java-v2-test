@@ -1,7 +1,6 @@
 package org.iot.dsa.dslink.test.subscribe;
 
 import org.iot.dsa.DSRuntime;
-import org.iot.dsa.conn.DSConnection.DSConnectionEvent;
 import org.iot.dsa.dslink.DSLinkConnection;
 import org.iot.dsa.dslink.test.AbstractTest;
 import org.iot.dsa.node.DSInfo;
@@ -9,7 +8,7 @@ import org.iot.dsa.node.DSInt;
 import org.iot.dsa.node.DSNode;
 import org.iot.dsa.node.event.DSIEvent;
 import org.iot.dsa.node.event.DSISubscriber;
-import org.iot.dsa.node.event.DSTopic;
+import org.iot.dsa.node.event.DSITopic;
 
 /**
  * All quality of service tests have the same basic structure:  they have a configurable number
@@ -73,28 +72,24 @@ public abstract class QosTest extends AbstractTest {
                           : null);
             put(NUM_VALUES, DSInt.valueOf(values));
             DSLinkConnection conn = getConnection();
-            conn.subscribe(DSLinkConnection.CONN_TOPIC, null, new DSISubscriber() {
+            conn.subscribe(DSLinkConnection.CONNECTED, null, new DSISubscriber() {
                 @Override
                 public void onEvent(final DSNode node, DSInfo child, DSIEvent event) {
-                    if (event == DSConnectionEvent.CONNECTED) {
-                        debug("onConnect " + getPath());
-                        if (subscribers != null) { //only on reconnect
-                            DSRuntime.runDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    for (QosSubscriber sub : subscribers) {
-                                        sub.start((DSLinkConnection) node);
-                                    }
+                    debug("onConnect " + getPath());
+                    if (subscribers != null) { //only on reconnect
+                        DSRuntime.runDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                for (QosSubscriber sub : subscribers) {
+                                    sub.start((DSLinkConnection) node);
                                 }
-                            }, 1000);
-                        }
-                    } else if (event == DSConnectionEvent.DISCONNECTED) {
-                        debug("QosTest.onDisconnect");
+                            }
+                        }, 1000);
                     }
                 }
 
                 @Override
-                public void onUnsubscribed(DSTopic topic, DSNode node, DSInfo child) {
+                public void onUnsubscribed(DSITopic topic, DSNode node, DSInfo child) {
                 }
             });
             //remove children from last test

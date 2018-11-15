@@ -8,7 +8,6 @@ import org.iot.dsa.node.DSNode;
 import org.iot.dsa.node.DSString;
 import org.iot.dsa.node.action.ActionInvocation;
 import org.iot.dsa.node.action.ActionResult;
-import org.iot.dsa.node.action.DSAbstractAction;
 import org.iot.dsa.node.action.DSAction;
 import org.iot.dsa.time.DSDateTime;
 
@@ -47,17 +46,17 @@ public abstract class AbstractTest extends DSNode implements Test {
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public boolean isEnabled() {
-        return enabled.getElement().toBoolean();
-    }
-
-    @Override
-    public ActionResult onInvoke(DSInfo action, ActionInvocation request) {
+    public ActionResult invoke(DSInfo action, DSInfo target, ActionInvocation request) {
         if (action == runAction) {
             runTest(request);
             return null;
         }
-        return super.onInvoke(action, request);
+        return super.invoke(action, target, request);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled.getElement().toBoolean();
     }
 
     @Override
@@ -121,7 +120,7 @@ public abstract class AbstractTest extends DSNode implements Test {
     /**
      * Override point, returns DSAction.DEFAULT.
      */
-    protected DSAbstractAction getRunAction() {
+    protected DSAction getRunAction() {
         return DSAction.DEFAULT;
     }
 

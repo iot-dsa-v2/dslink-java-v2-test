@@ -1,6 +1,6 @@
 # dslink-java-v2-test
 
-* Java - version 1.6 and up.
+* Java - version 1.8 and up.
 * [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 
@@ -141,9 +141,4 @@ This software contains unmodified binary redistributions of
 [sdk-dslink-java-v2](https://github.com/iot-dsa-v2/sdk-dslink-java-v2), which is licensed 
 and available under the Apache License 2.0. An original copy of the license agreement can be found 
 at https://github.com/iot-dsa-v2/sdk-dslink-java-v2/blob/master/LICENSE
-
-## History
-
-* Version 1.0.0
-  - First Release
 

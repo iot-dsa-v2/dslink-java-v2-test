@@ -2,7 +2,6 @@ package org.iot.dsa.dslink.test;
 
 import org.iot.dsa.node.DSInfo;
 import org.iot.dsa.node.DSInt;
-import org.iot.dsa.node.action.DSAbstractAction;
 import org.iot.dsa.node.action.DSAction;
 
 public class TestContainer extends AbstractTest implements Test {
@@ -81,7 +80,7 @@ public class TestContainer extends AbstractTest implements Test {
     }
 
     @Override
-    protected DSAbstractAction getRunAction() {
+    protected DSAction getRunAction() {
         return DSAction.DEFAULT;
     }
 

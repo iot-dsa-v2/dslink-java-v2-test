@@ -193,8 +193,7 @@ public class QosSubscriber extends DSNode implements OutboundSubscribeHandler {
             error("Target not met (" + lastValue + " != " + target + ") " + getPath());
             pass = false;
         }
-        if (!pass)
-        {
+        if (!pass) {
             int tmp = skipped - outOfOrder;
             if (tmp > 0) {
                 error(tmp + " lost values " + getPath());
